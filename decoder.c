@@ -19,8 +19,8 @@ void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
 	*zList = (uint16_t *)malloc(*nodeCount * sizeof(uint16_t));
 	MEM_TEST(*zList);
 
-	Fread((char *)*xList, (int)*nodeCount, 2, in);
-	Fread((char *)*zList, (int)*nodeCount, 2, in);
+	Fread((char *)*xList, *nodeCount, sizeof(uint16_t), in);
+	Fread((char *)*zList, *nodeCount, sizeof(uint16_t), in);
 }
 
 Encoder_Node *decoder_rebuildEncoder(uint16_t *xList, uint16_t *zList,
@@ -29,7 +29,7 @@ Encoder_Node *decoder_rebuildEncoder(uint16_t *xList, uint16_t *zList,
 	int i;
 	Encoder_Node *root;
 		
-	if (n <= 0)
+	if (n == 0)
 		return NULL;
 	
 	root = encoder_newNode(xList[xS], 0, NULL, NULL);

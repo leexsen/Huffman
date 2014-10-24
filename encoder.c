@@ -157,7 +157,7 @@ uint16_t encoder_getEncoderNodeCount(Encoder_Table **table)
 			++count;
 	}
 
-	return count*2 - 1;
+	return count == 1 ? 2 : count*2 - 1;
 }
 
 void encoder_writeHeader(Encoder_Node *root, File *out, uint32_t srcFileSize, uint16_t nodeCount)

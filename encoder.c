@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/stat.h>
 
 #include "encoder.h"
 #include "queue.h"
@@ -176,13 +177,14 @@ void encoder_writeData(Encoder_Table **table, File *in, File *out)
 {
 	Encoder_Table *t;
 
-	while (!Feof(in)) {
-		uint8_t ch = Fgetc(in);
+	int8_t ch = Fgetc(in);
 
-		if (Feof(in))
-			break;
+	while (!Feof(in)) {
+
 		for (t = table[ch]; t != NULL; t = t->next)
 			FwriteBit(t->node->bit, out, 0);
+
+		ch = Fgetc(in);
 	}
 	FwriteBit(0, out, 1);	
 }

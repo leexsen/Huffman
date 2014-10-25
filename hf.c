@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include "buffer.h"
 #include "encoder.h"
@@ -20,9 +21,9 @@ int main(int argc, char **argv)
 		outFile = argv[3];
 	}
 
-	in = Fopen(srcFile, "rb");
+	in = Fopen(srcFile, O_RDONLY, 0644);
 	MEM_TEST(in);
-	out = Fopen(outFile, "wb");
+	out = Fopen(outFile, O_WRONLY|O_CREAT, 0644);
 	MEM_TEST(out);
 
 	if (strcmp(argv[1], "-d"))
@@ -90,20 +91,15 @@ void decompress(File *in, File *out)
 		int8_t bit;
 
 		while (((bit=FgetBit(ch)) != (int8_t)-1) && length < fileSize) {
-			if (bit == (int8_t)0) {
+			if (bit == (int8_t)0)
 				p = p->left;
-				if (p->left == NULL && p->right == NULL) {
-					Fputc(p->ch, out);
-					p = root;
-					++length;
-				}
-			} else {
+			else
 				p = p->right;
-				if (p->left == NULL && p->right == NULL) {
-					Fputc(p->ch, out);
-					p = root;
-					++length;
-				}
+
+			if (p->left == NULL && p->right == NULL) {
+				Fputc(p->ch, out);
+				p = root;
+				++length;
 			}
 		}
 

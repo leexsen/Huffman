@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #include "buffer.h"
 
@@ -12,14 +13,13 @@ static uint32_t FgetFileSize(const char *filename)
 	return (stat(filename, &buf) < 0 ? 0 : (uint32_t)buf.st_size);
 }
 
-File *Fopen(const char *src, const char *flag)
+File *Fopen(const char *src, int flags, mode_t mode)
 {
-	FILE *fp;
+	int fp;
 	File *file = NULL;
 
-	if (src != NULL && flag != NULL) {
-		fp = fopen(src, flag);
-		MEM_TEST(fp);
+	if (src != NULL) {
+		fp = open(src, flags, mode);
 		file = (File *)malloc(sizeof(File));	
 		MEM_TEST(file);
 		file->fp = fp;
@@ -35,7 +35,7 @@ void Fclose(File *fp)
 {
 	if (fp != NULL) {
 		Fflush(fp);
-		fclose(fp->fp);
+		close(fp->fp);
 		free(fp);
 	}
 }
@@ -46,7 +46,7 @@ int8_t Fgetc(File *fp)
 		return EOF;
 
 	if (fp->length == 0 || (fp->index == fp->length)) {
-		fp->length = fread(fp->buf, 1, FILE_BUF_SIZE, fp->fp);
+		fp->length = read(fp->fp, fp->buf, FILE_BUF_SIZE);
 		fp->index = 0;
 		if (fp->length == 0) {
 			fp->eof = 1;
@@ -76,7 +76,7 @@ void Fputc(uint8_t ch, File *fp)
 		fp->buf[fp->length++] = ch;
 
 		if (fp->length == FILE_BUF_SIZE) {
-			fwrite(fp->buf, fp->length, 1, fp->fp);
+			write(fp->fp, fp->buf, fp->length);
 			fp->length = 0;
 		}
 	}
@@ -117,7 +117,7 @@ void Fflush(File *fp)
 	if (fp == NULL)
 		return;
 
-	fwrite(fp->buf, fp->length, 1, fp->fp);
+	write(fp->fp, fp->buf, fp->length);
 	fp->length = 0;
 }
 
@@ -131,7 +131,7 @@ void Frewind(File *fp)
 	if (fp == NULL)
 		return;
 
-	rewind(fp->fp);
+	lseek(fp->fp, 0, SEEK_SET);
 	fp->length = 0;
 	fp->eof = 0;
 }

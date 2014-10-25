@@ -2,12 +2,13 @@
 #define _BUFFER_H_
 
 #include <stdint.h>
+#include <fcntl.h>
 #include "general.h"
 
 #define FILE_BUF_SIZE 8192 
 
 struct file {
-	FILE *fp;
+	int fp;
 	int8_t eof;
 	uint16_t index;
 	uint16_t length;
@@ -15,7 +16,7 @@ struct file {
 	uint8_t buf[FILE_BUF_SIZE];
 };
 
-extern File *Fopen(const char *, const char *);
+extern File *Fopen(const char *, int, mode_t mode);
 extern void Fclose(File *);
 extern uint8_t Feof(File *);
 extern int8_t Fgetc(File *);

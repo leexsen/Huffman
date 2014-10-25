@@ -16,7 +16,7 @@ struct file {
 	uint8_t buf[FILE_BUF_SIZE];
 };
 
-extern File *Fopen(const char *, int, mode_t mode);
+extern File *Fopen(const char *, int, mode_t);
 extern void Fclose(File *);
 extern uint8_t Feof(File *);
 extern int8_t Fgetc(File *);

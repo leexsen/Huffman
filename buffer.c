@@ -20,6 +20,10 @@ File *Fopen(const char *src, int flags, mode_t mode)
 
 	if (src != NULL) {
 		fp = open(src, flags, mode);
+
+		if (fp == -1)
+			return NULL;
+
 		file = (File *)malloc(sizeof(File));	
 		MEM_TEST(file);
 		file->fp = fp;
@@ -40,7 +44,7 @@ void Fclose(File *fp)
 	}
 }
 
-int8_t Fgetc(File *fp)
+inline int8_t Fgetc(File *fp)
 {
 	if (fp == NULL)
 		return EOF;
@@ -70,7 +74,7 @@ void Fgets(char *buf, int bufsize, File *fp)
 	buf[bufsize-1] = '\0';
 }
 
-void Fputc(uint8_t ch, File *fp)
+inline void Fputc(uint8_t ch, File *fp)
 {
 	if (fp != NULL) {
 		fp->buf[fp->length++] = ch;
@@ -96,7 +100,7 @@ int Fwrite(const char *buf, int size, int count, File *fp)
 {
 	int i, length = count * size;
 
-	for (i = 0; i < length && !Feof(fp); i++)
+	for (i = 0; i < length; i++)
 		Fputc(buf[i], fp);
 
 	return i;

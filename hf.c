@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "buffer.h"
 #include "encoder.h"
@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 
 	in = Fopen(srcFile, O_RDONLY, 0644);
 	MEM_TEST(in);
-	out = Fopen(outFile, O_WRONLY|O_CREAT, 0644);
+	out = Fopen(outFile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	MEM_TEST(out);
 
 	if (strcmp(argv[1], "-d"))

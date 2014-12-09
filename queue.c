@@ -2,15 +2,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "encoder.h"
 #include "queue.h"
-
-struct encoder_node {
-	uint16_t ch;
-	uint8_t bit;
-	struct encoder_node *left;
-	struct encoder_node *right;
-	struct encoder_node *parent;
-};
 
 Queue *queue_new(void)
 {

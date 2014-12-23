@@ -31,21 +31,21 @@ Encoder_Node *encoder_newEncoder(Queue *q)
 	if (q == NULL || q->head == NULL)
 		return NULL;
 
-	while (q->length - q->cannotReadCount != 1 || q->length <= 1) {
+	while (q->length - q->hasReadCount != 1 || q->length <= 1) {
     	uint32_t sum = 0;
 
 		ql = queue_getMinNode(q);
 		if (ql != NULL) {
-			ql->cannotRead = 1;
-			q->cannotReadCount++;
+			ql->hasRead = 1;
+			q->hasReadCount++;
 			el = ql->eNode;
 			sum += ql->count;
 		}
 
 		qr = queue_getMinNode(q);
 		if (qr != NULL) {
-			qr->cannotRead = 1;
-			q->cannotReadCount++;
+			qr->hasRead = 1;
+			q->hasReadCount++;
 			er = qr->eNode;
 			sum += qr->count;
 		}

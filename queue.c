@@ -11,9 +11,9 @@ Queue *queue_new(void)
 	q = (Queue *)malloc(sizeof(Queue));
 	MEM_TEST(q);
 	q->length = 0;
-	q->cannotReadCount = 0;
+	q->hasReadCount = 0;
 	q->head = NULL;
-	q->end = NULL;
+	q->tail = NULL;
 
 	return q;
 }
@@ -27,7 +27,7 @@ Queue_Node *queue_newNode(uint32_t count, Encoder_Node *p, Queue_Node *prev, Que
 	q->eNode = p;
 	q->prev = prev;
 	q->next = next;
-	q->cannotRead = 0;
+	q->hasRead = 0;
 
 	return q;
 }
@@ -42,7 +42,7 @@ Queue_Node *queue_getMinNode(Queue *queue)
 		return NULL;
 
 	for (q = queue->head; q != NULL; q = q->next) {
-		if (q->cannotRead == 0 && q->count < min) {
+		if (q->hasRead == 0 && q->count < min) {
 			minNode = q;
 			min = q->count;
 		}
@@ -56,14 +56,13 @@ void queue_append(Queue *q, Queue_Node *qn)
 	if (q == NULL || qn == NULL)
 		return;
 
-	if (q->head != NULL && q->end != NULL) {
-		
-		q->end->next = qn;
-		qn->prev = q->end;
+	if (q->head != NULL && q->tail != NULL) {
+		q->tail->next = qn;
+		qn->prev = q->tail;
 	} else
 		q->head = qn;
 
-	q->end = qn;
+	q->tail = qn;
 	q->length++;
 }
 
@@ -73,9 +72,9 @@ void queue_freeQueue(Queue *queue)
 		return;
 
 	while (queue->head != NULL) {
-		queue->end = queue->head->next;
+		queue->tail = queue->head->next;
 		free(queue->head);
-		queue->head = queue->end;
+		queue->head = queue->tail;
 	}
 
 	free(queue);

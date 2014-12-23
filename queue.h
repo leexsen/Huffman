@@ -6,7 +6,7 @@
 
 struct queue_node {
 	uint32_t count;
-	uint8_t cannotRead;	/* can't read: 1, can read: 0 */
+	uint8_t hasRead;
 	Encoder_Node *eNode; 
 	struct queue_node *prev;
 	struct queue_node *next;
@@ -14,11 +14,10 @@ struct queue_node {
 
 struct queue {
 	uint16_t length;
-	uint16_t cannotReadCount;
+	uint16_t hasReadCount;
 	Queue_Node *head;
-	Queue_Node *end;
+	Queue_Node *tail;
 };
-
 
 extern void queue_append(Queue *, Queue_Node *);
 extern Queue *queue_new(void);

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "encoder.h"
+#include "buffer.h"
 #include "queue.h"
 
 Encoder_Node *encoder_newNode(uint16_t ch, uint8_t bit,
@@ -126,21 +127,21 @@ void encoder_freeEncoderTable(Encoder_Table **table)
 	free(table);
 }
 
-static void encoder_writeXian(Encoder_Node *root, File *out)
+static void encoder_preOrder(Encoder_Node *root, File *out)
 {
 	if (root != NULL) {
 		Fwrite((const char *)&root->ch, sizeof(root->ch), 1, out);
-		encoder_writeXian(root->left, out);
-		encoder_writeXian(root->right, out);
+		encoder_preOrder(root->left, out);
+		encoder_preOrder(root->right, out);
 	}
 }
 
-static void encoder_writeZhong(Encoder_Node *root, File *out)
+static void encoder_inOrder(Encoder_Node *root, File *out)
 {
 	if (root != NULL) {
-		encoder_writeZhong(root->left, out);
+		encoder_inOrder(root->left, out);
 		Fwrite((const char *)&root->ch, sizeof(root->ch), 1, out);
-		encoder_writeZhong(root->right, out);
+		encoder_inOrder(root->right, out);
 	}
 }
 
@@ -167,10 +168,9 @@ void encoder_writeHeader(Encoder_Node *root, File *out, uint32_t srcFileSize, ui
 
 	Fwrite((const char *)&srcFileSize, sizeof(srcFileSize), 1, out);	
 	Fwrite((char *)&nodeCount, sizeof(nodeCount), 1, out);	
-	encoder_writeXian(root, out);
-	encoder_writeZhong(root, out);
+	encoder_preOrder(root, out);
+	encoder_inOrder(root, out);
 }
-
 
 void encoder_writeData(Encoder_Table **table, File *in, File *out)
 {

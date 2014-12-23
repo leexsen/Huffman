@@ -2,7 +2,6 @@
 #define _BUFFER_H_
 
 #include <stdint.h>
-#include <fcntl.h>
 #include "general.h"
 
 #define FILE_BUF_SIZE 8192 

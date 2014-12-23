@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include "general.h"
-#include "buffer.h"
 
 struct encoder_node {
 	uint16_t ch;

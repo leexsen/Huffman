@@ -62,19 +62,6 @@ inline int8_t Fgetc(File *fp)
 	return fp->buf[fp->index++];
 }
 
-void Fgets(char *buf, int bufsize, File *fp)
-{
-	int i;
-
-	if (buf == NULL || fp == NULL || bufsize == 0)
-		return;
-
-	for (i = 0; i < bufsize-1; i++)
-		buf[i] = Fgetc(fp);
-
-	buf[bufsize-1] = '\0';
-}
-
 inline void Fputc(uint8_t ch, File *fp)
 {
 	if (fp != NULL) {
@@ -85,16 +72,6 @@ inline void Fputc(uint8_t ch, File *fp)
 			fp->length = 0;
 		}
 	}
-}
-
-void Fputs(const char *str, File *fp)
-{
-	int i;
-	if (str == NULL || fp == NULL)
-		return;
-
-	for (i = 0; str[i] != '\0'; i++)
-		Fputc(str[i], fp);
 }
 
 int Fwrite(const char *buf, int size, int count, File *fp)
@@ -119,7 +96,7 @@ int Fread(char *buf, int size, int count, File *fp)
 
 void Fflush(File *fp)
 {
-	if (fp == NULL)
+	if (fp == NULL || fp->length == 0)
 		return;
 
 	write(fp->fp, fp->buf, fp->length);
@@ -136,7 +113,7 @@ void Frewind(File *fp)
 	if (fp == NULL)
 		return;
 
-	lseek(fp->fp, 0, SEEK_SET);
+	lseek(fp->fp, 0L, SEEK_SET);
 	fp->length = 0;
 	fp->eof = 0;
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 
 #include "encoder.h"
@@ -13,10 +14,12 @@ Encoder_Node *encoder_newNode(uint16_t ch, uint8_t bit,
 
 	p = (Encoder_Node *)malloc(sizeof(Encoder_Node));
 	MEM_TEST(p);
+
 	p->ch = ch;
 	p->bit = bit;
 	p->left = left;
 	p->right = right;
+	p->parent = NULL;
 
 	return p;
 }
@@ -83,7 +86,7 @@ void encoder_freeEncoder(Encoder_Node *root)
 Encoder_Table **encoder_newEncoderTable(Queue_Node **data)
 {
 	Encoder_Table **table;
-	int i;
+	uint16_t i;
 	Encoder_Table *qt, *qr;
 	Encoder_Node *p;
 
@@ -91,9 +94,13 @@ Encoder_Table **encoder_newEncoderTable(Queue_Node **data)
 		return NULL;
 
 	table = (Encoder_Table **)malloc(sizeof(Encoder_Table *) * 256);	
+	MEM_TEST(table);
+	memset(table, 0, sizeof(Encoder_Table *) * 256);
+
 	for (i = 0; i < 256; i++) {
 		if (data[i] != NULL) {
 			qr = NULL;
+
 			for (p = data[i]->eNode; p->parent != NULL; p = p->parent) {
 				qt = (Encoder_Table *)malloc(sizeof(Encoder_Table));	
 				MEM_TEST(qt);
@@ -110,7 +117,7 @@ Encoder_Table **encoder_newEncoderTable(Queue_Node **data)
 
 void encoder_freeEncoderTable(Encoder_Table **table)
 {
-	int i;
+	uint16_t i;
 	Encoder_Table *t;
 
 	if (table == NULL)
@@ -147,7 +154,7 @@ static void encoder_inOrder(Encoder_Node *root, File *out)
 
 uint16_t encoder_getEncoderNodeCount(Encoder_Table **table)
 {
-	int i;
+	uint16_t i;
 	uint16_t count = 0;
 
 	if (table == NULL)

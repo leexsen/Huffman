@@ -26,7 +26,7 @@ void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
 Encoder_Node *decoder_rebuildEncoder(uint16_t *xList, uint16_t *zList,
 									 uint16_t xS, uint16_t zS, uint16_t n)
 {
-	int i;
+	uint16_t i;
 	Encoder_Node *root;
 		
 	if (n == 0)

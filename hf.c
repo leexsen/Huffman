@@ -40,14 +40,12 @@ int main(int argc, char **argv)
 void compress(File *in, File *out)
 {
 	uint8_t ch;
-	Queue_Node *buf[256];
+	Queue_Node *buf[256] = {0};
 	Queue *queueHead;
 	Encoder_Node *en, *root;
 	Encoder_Table **table;
 	Queue_Node *qn;
 	uint16_t nodeCount;
-
-	memset(buf, 0, sizeof(buf));
 
 	queueHead = queue_new();
 	ch = Fgetc(in);
@@ -90,8 +88,8 @@ void decompress(File *in, File *out)
 	while (!Feof(in)) {
 		int8_t bit;
 
-		while (((bit=FgetBit(ch)) != (int8_t)-1) && length < fileSize) {
-			if (bit == (int8_t)0)
+		while (((bit=FgetBit(ch)) != -1) && length < fileSize) {
+			if (bit == 0)
 				p = p->left;
 			else
 				p = p->right;

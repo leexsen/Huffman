@@ -10,6 +10,7 @@ Queue *queue_new(void)
 	Queue *q;
 	q = (Queue *)malloc(sizeof(Queue));
 	MEM_TEST(q);
+
 	q->length = 0;
 	q->hasReadCount = 0;
 	q->head = NULL;
@@ -23,6 +24,7 @@ Queue_Node *queue_newNode(uint32_t count, Encoder_Node *p, Queue_Node *prev, Que
 	Queue_Node *q;
 	q = (Queue_Node *)malloc(sizeof(Queue_Node));
 	MEM_TEST(q);
+
 	q->count = count;
 	q->eNode = p;
 	q->prev = prev;
@@ -34,7 +36,7 @@ Queue_Node *queue_newNode(uint32_t count, Encoder_Node *p, Queue_Node *prev, Que
 
 Queue_Node *queue_getMinNode(Queue *queue)
 {
-    uint32_t min = 4294967295U;
+    uint32_t min = UINT32_MAX;
 	Queue_Node *minNode = NULL;
 	Queue_Node *q;
 

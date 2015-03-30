@@ -5,38 +5,36 @@
 #include "buffer.h"
 
 void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
-					  uint16_t **xList, uint16_t **zList, File *in)
+					  uint16_t **bfsData, File *in)
 {
 	if (size == NULL || nodeCount == NULL ||
-		xList == NULL || zList == NULL || in == NULL)
+		bfsData == NULL || in == NULL)
 		return;
 
 	Fread((char *)size, sizeof(*size), 1, in);
 	Fread((char *)nodeCount, sizeof(*nodeCount), 1, in);
 
-	*xList = (uint16_t *)malloc(*nodeCount * sizeof(uint16_t));
-	MEM_TEST(*xList);
-	*zList = (uint16_t *)malloc(*nodeCount * sizeof(uint16_t));
-	MEM_TEST(*zList);
+	*bfsData = (uint16_t *)malloc(*nodeCount * sizeof(**bfsData));
+	MEM_TEST(*bfsData);
 
-	Fread((char *)*xList, *nodeCount, sizeof(uint16_t), in);
-	Fread((char *)*zList, *nodeCount, sizeof(uint16_t), in);
+	Fread((char *)*bfsData, *nodeCount, sizeof(**bfsData), in);
 }
 
-Encoder_Node *decoder_rebuildEncoder(uint16_t *xList, uint16_t *zList,
-									 uint16_t xS, uint16_t zS, uint16_t n)
+Encoder_Node *decoder_rebuildEncoder(uint16_t *bfsData, uint16_t i, uint16_t n)
 {
-	uint16_t i;
-	Encoder_Node *root;
-		
-	if (n == 0)
+	if (i >= n)
 		return NULL;
-	
-	root = encoder_newNode(xList[xS], 0, NULL, NULL);
-	for (i = 0; i < n && (xList[xS] != zList[zS+i]); i++);
-	
-	root->left = decoder_rebuildEncoder(xList, zList, xS+1, zS, i);
-	root->right = decoder_rebuildEncoder(xList, zList, xS+i+1, zS+i+1, n-i-1);
-	
+
+	Encoder_Node *root = encoder_newNode(bfsData[i], 0, NULL, NULL);
+
+	// determine if this is a leaf node
+	if (!(bfsData[i] & 0x8000)) {
+
+		uint16_t index = bfsData[i]; // left-child node index
+
+		root->left = decoder_rebuildEncoder(bfsData, index, n);
+		root->right = decoder_rebuildEncoder(bfsData, index+1, n);
+	}
+
 	return root;	
 }

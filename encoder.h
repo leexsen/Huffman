@@ -5,8 +5,13 @@
 #include "general.h"
 
 struct encoder_node {
-	uint16_t ch;
 	uint8_t bit;
+
+	/* 15th bit is leaf node flag, 1 is leaf, 0 is not
+	   0-8 bits are data in leaf node
+	   0-9 bits are left-child node index in non-leaf node */
+	uint16_t ch;
+
 	struct encoder_node *left;
 	struct encoder_node *right;
 	struct encoder_node *parent;

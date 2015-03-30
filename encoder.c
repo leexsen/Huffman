@@ -26,7 +26,6 @@ Encoder_Node *encoder_newNode(uint16_t ch, uint8_t bit,
 
 Encoder_Node *encoder_newEncoder(Queue *q)
 {
-	static uint16_t num = 1;
 	Queue_Node *qr, *ql;
 	Encoder_Node *treeHead = NULL;
 	Encoder_Node *er = NULL, *el = NULL;
@@ -54,16 +53,15 @@ Encoder_Node *encoder_newEncoder(Queue *q)
 			sum += qr->count;
 		}
 
-		treeHead = encoder_newNode(num << 8, 0, el, er);
-		++num;
+		treeHead = encoder_newNode(0, 0, el, er);
 
 		if (el != NULL) {
-			treeHead->left->bit = 0;
-			treeHead->left->parent = treeHead;
+			el->bit = 0;
+			el->parent = treeHead;
 		}
 		if (er != NULL) {
-			treeHead->right->bit = 1;
-			treeHead->right->parent = treeHead;
+			er->bit = 1;
+			er->parent = treeHead;
 		}
 		r = queue_newNode(sum, treeHead, NULL, NULL);
 
@@ -134,21 +132,30 @@ void encoder_freeEncoderTable(Encoder_Table **table)
 	free(table);
 }
 
-static void encoder_preOrder(Encoder_Node *root, File *out)
+static void encoder_BFS(Encoder_Node *root, uint16_t nodeCount, uint16_t *bfsData)
 {
-	if (root != NULL) {
-		Fwrite((const char *)&root->ch, sizeof(root->ch), 1, out);
-		encoder_preOrder(root->left, out);
-		encoder_preOrder(root->right, out);
-	}
-}
+	if (root == NULL)
+		return;
 
-static void encoder_inOrder(Encoder_Node *root, File *out)
-{
-	if (root != NULL) {
-		encoder_inOrder(root->left, out);
-		Fwrite((const char *)&root->ch, sizeof(root->ch), 1, out);
-		encoder_inOrder(root->right, out);
+	Encoder_Node *queue[nodeCount-1];
+	uint16_t head = 0, tail = 0;
+
+
+	while (head < nodeCount) {
+		uint16_t ch = root->ch;
+
+		if (root->left != NULL) {
+			ch = tail+1; // left-child node index in non-leaf node
+			queue[tail++] = root->left;		
+
+			if (root->right != NULL)
+				queue[tail++] = root->right;			
+
+		} else
+			ch |= 0x8000; // set isLeaf flag 1(ture)
+
+		bfsData[head] = ch;
+		root = queue[head++];	
 	}
 }
 
@@ -175,8 +182,10 @@ void encoder_writeHeader(Encoder_Node *root, File *out, uint32_t srcFileSize, ui
 
 	Fwrite((const char *)&srcFileSize, sizeof(srcFileSize), 1, out);	
 	Fwrite((char *)&nodeCount, sizeof(nodeCount), 1, out);	
-	encoder_preOrder(root, out);
-	encoder_inOrder(root, out);
+
+	uint16_t bfsData[nodeCount];
+	encoder_BFS(root, nodeCount, bfsData);
+	Fwrite((char *)bfsData, sizeof(*bfsData) * nodeCount, 1, out);	
 }
 
 void encoder_writeData(Encoder_Table **table, File *in, File *out)

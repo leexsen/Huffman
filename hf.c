@@ -13,13 +13,16 @@ int main(int argc, char **argv)
 	File *in, *out;
 	char *srcFile, *outFile;
 
-	if (strcmp(argv[1], "-d")) {
-		srcFile = argv[1];
-		outFile = argv[2];
-	} else {
-		srcFile = argv[2];
-		outFile = argv[3];
+	if (argc < 3) {
+		printf("\nusage: hf [-d] input_file output_file\n"
+			   "-d - decompress\n"
+			   "-c - compress (default)\n\n");
+
+		exit(0);
 	}
+
+	srcFile = argv[2];
+	outFile = argv[3];
 
 	in = Fopen(srcFile, O_RDONLY, 0644);
 	MEM_TEST(in);
@@ -49,7 +52,9 @@ void compress(File *in, File *out)
 
 	queueHead = queue_new();
 	ch = Fgetc(in);
+
 	while (!Feof(in)) {
+
 		if (buf[ch] == NULL) {
 			en = encoder_newNode(ch, 0, NULL, NULL);
 			qn = queue_newNode(1, en, NULL, NULL);
@@ -62,6 +67,7 @@ void compress(File *in, File *out)
 	}
 
 	Frewind(in);
+
 	root = encoder_newEncoder(queueHead);
 	table = encoder_newEncoderTable(buf);
 	nodeCount = encoder_getEncoderNodeCount(table);
@@ -77,11 +83,11 @@ void decompress(File *in, File *out)
 {
     uint32_t fileSize, length = 0;
 	uint16_t encoderNodeCount;
-	uint16_t ch, *xList, *zList;
+	uint16_t ch, *bfsData;
 	Encoder_Node *root, *p;
 
-	decoder_readHead(&fileSize, &encoderNodeCount, &xList, &zList, in);
-	root = decoder_rebuildEncoder(xList, zList, 0, 0, encoderNodeCount);
+	decoder_readHead(&fileSize, &encoderNodeCount, &bfsData, in);
+	root = decoder_rebuildEncoder(bfsData, 0, encoderNodeCount);
 
 	ch = Fgetc(in);
 	p = root;
@@ -104,7 +110,6 @@ void decompress(File *in, File *out)
 		ch = Fgetc(in);
 	}
 
-	free(xList);
-	free(zList);
+	free(bfsData);
 	encoder_freeEncoder(root);
 }

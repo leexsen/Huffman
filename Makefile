@@ -1,4 +1,8 @@
-CFLAGS=-Wall -Werror -Os -c 
+ifeq ($(DEBUG), 1)
+	CFLAGS=-Wall -Werror -g -c
+else
+	CFLAGS=-Os -c 
+endif
 
 all: buffer.o encoder.o decoder.o hf.o queue.o 
 	cc -o hf buffer.o encoder.o decoder.o hf.o queue.o

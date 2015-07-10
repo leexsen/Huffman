@@ -8,8 +8,8 @@ struct encoder_node {
 	uint8_t bit;
 
 	/* 15th bit is leaf node flag, 1 is leaf, 0 is not
-	   0-8 bits are data in leaf node
-	   0-9 bits are left-child node index in non-leaf node */
+	   0-7 bits are data in leaf node
+	   0-8 bits are left-child node index in non-leaf node */
 	uint16_t ch;
 
 	struct encoder_node *left;

@@ -14,9 +14,10 @@ int main(int argc, char **argv)
 	char *srcFile, *outFile;
 
 	if (argc < 3) {
-		printf("\nusage: hf [-d] input_file output_file\n"
-			   "-d - decompress\n"
-			   "-c - compress (default)\n\n");
+		printf("\nusage: hf [option] input_file output_file\n"
+			   "\noption:\n"
+			   "  -d -decompress\n"
+			   "  -c -compress\n\n");
 
 		exit(0);
 	}

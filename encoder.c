@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 #include "encoder.h"
 #include "buffer.h"
@@ -185,7 +184,7 @@ void encoder_writeHeader(Encoder_Node *root, File *out, uint32_t srcFileSize, ui
 
 	uint16_t bfsData[nodeCount];
 	encoder_BFS(root, nodeCount, bfsData);
-	Fwrite((char *)bfsData, sizeof(*bfsData) * nodeCount, 1, out);	
+	Fwrite((char *)bfsData, sizeof(bfsData), 1, out);	
 }
 
 void encoder_writeData(Encoder_Table **table, File *in, File *out)

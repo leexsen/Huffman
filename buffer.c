@@ -26,6 +26,7 @@ File *Fopen(const char *src, int flags, mode_t mode)
 
 		file = (File *)malloc(sizeof(File));	
 		MEM_TEST(file);
+
 		file->fp = fp;
 		file->length = 0;
 		file->size = FgetFileSize(src);
@@ -50,8 +51,10 @@ inline int8_t Fgetc(File *fp)
 		return EOF;
 
 	if (fp->length == 0 || (fp->index == fp->length)) {
+
 		fp->length = read(fp->fp, fp->buf, FILE_BUF_SIZE);
 		fp->index = 0;
+
 		if (fp->length == 0) {
 			fp->eof = 1;
 			return EOF;
@@ -104,7 +107,7 @@ void Fflush(File *fp)
 
 uint8_t Feof(File *fp)
 {
-	return (fp == NULL || (fp->eof == 1) ? 1 : 0);
+	return (fp == NULL || fp->eof);
 }
 
 void Frewind(File *fp)
@@ -141,14 +144,13 @@ void FwriteBit(uint8_t bit, File *out, uint8_t isFlush)
 
 int8_t FgetBit(uint8_t ch)
 {
-	uint8_t bit = 0x80;
-	static uint8_t i = 0;
+	static int8_t i = 7;
 
-	if (i == 8) {
-		i = 0;
+	if (i == -1) {
+		i = 7;
 		return -1;
 	}
 
-	bit >>= i++;
-	return (((bit & ch) == bit) ? 1 : 0);
+	ch >>= i--;
+	return (ch & 1);
 }

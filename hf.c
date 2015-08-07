@@ -25,9 +25,15 @@ int main(int argc, char **argv)
 	srcFile = argv[2];
 	outFile = argv[3];
 
+#ifndef DOS
 	in = Fopen(srcFile, O_RDONLY, 0644);
-	MEM_TEST(in);
 	out = Fopen(outFile, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+#else
+	in = Fopen(srcFile, O_RDONLY|O_BINARY);
+	out = Fopen(outFile, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY);
+#endif
+
+	MEM_TEST(in);
 	MEM_TEST(out);
 
 	if (strcmp(argv[1], "-d"))
@@ -71,6 +77,7 @@ void compress(File *in, File *out)
 
 	root = encoder_newEncoder(queueHead);
 	table = encoder_newEncoderTable(buf);
+
 	nodeCount = encoder_getEncoderNodeCount(table);
 	encoder_writeHeader(root, out, in->size, nodeCount);
 	encoder_writeData(table, in, out);

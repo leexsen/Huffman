@@ -2,24 +2,35 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #include "buffer.h"
+
+#ifndef DOS
+#include <unistd.h>
+#endif
 
 static uint32_t FgetFileSize(const char *filename)
 {
 	struct stat buf;
 
-	return (stat(filename, &buf) < 0 ? 0 : (uint32_t)buf.st_size);
+	return (stat(filename, &buf) < 0 ? 0 : buf.st_size);
 }
 
+#ifndef DOS
 File *Fopen(const char *src, int flags, mode_t mode)
+#else
+File *Fopen(const char *src, int flags)
+#endif
 {
 	int fp;
 	File *file = NULL;
 
 	if (src != NULL) {
+#ifndef DOS
 		fp = open(src, flags, mode);
+#else
+		fp = open(src, flags);
+#endif
 
 		if (fp == -1)
 			return NULL;
@@ -35,7 +46,7 @@ File *Fopen(const char *src, int flags, mode_t mode)
 
 	return file;
 }
-
+	
 void Fclose(File *fp)
 {
 	if (fp != NULL) {
@@ -45,7 +56,10 @@ void Fclose(File *fp)
 	}
 }
 
-inline int8_t Fgetc(File *fp)
+#ifndef DOS
+inline
+#endif
+int8_t Fgetc(File *fp)
 {
 	if (fp == NULL)
 		return EOF;
@@ -64,7 +78,10 @@ inline int8_t Fgetc(File *fp)
 	return fp->buf[fp->index++];
 }
 
-inline void Fputc(uint8_t ch, File *fp)
+#ifndef DOS
+inline 
+#endif
+void Fputc(uint8_t ch, File *fp)
 {
 	if (fp != NULL) {
 		fp->buf[fp->length++] = ch;

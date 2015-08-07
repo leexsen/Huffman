@@ -22,15 +22,15 @@ void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
 
 Encoder_Node *decoder_rebuildEncoder(uint16_t *bfsData, uint16_t i, uint16_t n)
 {
+	Encoder_Node *root = encoder_newNode(bfsData[i], 0, NULL, NULL);
+
 	if (i >= n)
 		return NULL;
 
-	Encoder_Node *root = encoder_newNode(bfsData[i], 0, NULL, NULL);
-
-	// determine if this is a leaf node
+	/* determine if this is a leaf node */
 	if (!(bfsData[i] & 0x8000)) {
 
-		uint16_t index = bfsData[i]; // left-child node index
+		uint16_t index = bfsData[i]; /* left-child node index */
 
 		root->left = decoder_rebuildEncoder(bfsData, index, n);
 		root->right = decoder_rebuildEncoder(bfsData, index+1, n);

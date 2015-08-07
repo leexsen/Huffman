@@ -90,9 +90,8 @@ Encoder_Table **encoder_newEncoderTable(Queue_Node **data)
 	if (data == NULL)
 		return NULL;
 
-	table = (Encoder_Table **)malloc(sizeof(Encoder_Table *) * 256);	
+	table = (Encoder_Table **)calloc(sizeof(Encoder_Table *), 256);	
 	MEM_TEST(table);
-	memset(table, 0, sizeof(Encoder_Table *) * 256);
 
 	for (i = 0; i < 256; i++) {
 		if (data[i] != NULL) {
@@ -133,29 +132,36 @@ void encoder_freeEncoderTable(Encoder_Table **table)
 
 static void encoder_BFS(Encoder_Node *root, uint16_t nodeCount, uint16_t *bfsData)
 {
+	uint16_t head = 0, tail = 0;
+#ifndef DOS
+	Encoder_Node *queue[nodeCount-1];
+#else
+	Encoder_Node **queue = (Encoder_Node **)malloc(sizeof(Encoder_Node *) * (nodeCount-1));
+#endif
+
 	if (root == NULL)
 		return;
-
-	Encoder_Node *queue[nodeCount-1];
-	uint16_t head = 0, tail = 0;
-
 
 	while (head < nodeCount) {
 		uint16_t ch = root->ch;
 
 		if (root->left != NULL) {
-			ch = tail+1; // left-child node index in non-leaf node
+			ch = tail+1; /* left-child node index in non-leaf node */
 			queue[tail++] = root->left;		
 
 			if (root->right != NULL)
 				queue[tail++] = root->right;			
 
 		} else
-			ch |= 0x8000; // set isLeaf flag 1(ture)
+			ch |= 0x8000; /* set isLeaf flag 1(ture) */
 
 		bfsData[head] = ch;
 		root = queue[head++];	
 	}
+
+#ifdef DOS
+	free(queue);
+#endif
 }
 
 uint16_t encoder_getEncoderNodeCount(Encoder_Table **table)
@@ -176,15 +182,26 @@ uint16_t encoder_getEncoderNodeCount(Encoder_Table **table)
 
 void encoder_writeHeader(Encoder_Node *root, File *out, uint32_t srcFileSize, uint16_t nodeCount)
 {
+#ifndef DOS
+	uint16_t bfsData[nodeCount];
+#else
+	uint16_t *bfsData = (uint16_t *)malloc(sizeof(uint16_t) * nodeCount);
+#endif
+
 	if (root == NULL || out == NULL)	
 		return;
 
 	Fwrite((const char *)&srcFileSize, sizeof(srcFileSize), 1, out);	
 	Fwrite((char *)&nodeCount, sizeof(nodeCount), 1, out);	
 
-	uint16_t bfsData[nodeCount];
 	encoder_BFS(root, nodeCount, bfsData);
+
+#ifndef DOS
 	Fwrite((char *)bfsData, sizeof(bfsData), 1, out);	
+#else
+	Fwrite((char *)bfsData, sizeof(*bfsData), nodeCount, out);	
+	free(bfsData);
+#endif
 }
 
 void encoder_writeData(Encoder_Table **table, File *in, File *out)

@@ -3,20 +3,20 @@
 #include "decoder.h"
 #include "buffer.h"
 
-void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
-					  uint16_t **bfsData, File *in)
+void decoder_readHead(uint32_t *size, uint16_t **bfsData, File *in)
 {
-	if (size == NULL || nodeCount == NULL ||
-		bfsData == NULL || in == NULL)
+	if (size == NULL || bfsData == NULL || in == NULL)
 		return;
 
-	Fread((char *)size, sizeof(*size), 1, in);
-	Fread((char *)nodeCount, sizeof(*nodeCount), 1, in);
+	uint16_t nodeCount;
 
-	*bfsData = (uint16_t *)malloc(*nodeCount * sizeof(**bfsData));
+	Fread((char *)size, sizeof(*size), 1, in);
+	Fread((char *)&nodeCount, sizeof(nodeCount), 1, in);
+
+	*bfsData = (uint16_t *)malloc(nodeCount * sizeof(**bfsData));
 	MEM_TEST(*bfsData);
 
-	Fread((char *)*bfsData, *nodeCount, sizeof(**bfsData), in);
+	Fread((char *)*bfsData, nodeCount, sizeof(**bfsData), in);
 }
 
 void decoder_writeData(uint16_t *bfsData, uint32_t fileSize, File *in, File *out)

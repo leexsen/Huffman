@@ -69,10 +69,9 @@ void compress(File *in, File *out)
 void decompress(File *in, File *out)
 {
 	uint32_t fileSize;
-	uint16_t encoderNodeCount;
 	uint16_t *bfsData;
 
-	decoder_readHead(&fileSize, &encoderNodeCount, &bfsData, in);
+	decoder_readHead(&fileSize, &bfsData, in);
 	decoder_writeData(bfsData, fileSize, in, out);
 
 	free(bfsData);

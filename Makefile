@@ -1,7 +1,7 @@
 ifeq ($(DEBUG), 1)
 	CFLAGS=-Wall -Werror -g -c
 else
-	CFLAGS=-Os -c 
+	CFLAGS=-Ofast -c 
 endif
 
 all: buffer.o encoder.o decoder.o hf.o queue.o 

@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "decoder.h"
-#include "encoder.h"
 #include "buffer.h"
 
 void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
@@ -20,21 +19,26 @@ void decoder_readHead(uint32_t *size, uint16_t *nodeCount,
 	Fread((char *)*bfsData, *nodeCount, sizeof(**bfsData), in);
 }
 
-Encoder_Node *decoder_rebuildEncoder(uint16_t *bfsData, uint16_t i, uint16_t n)
+void decoder_writeData(uint16_t *bfsData, uint32_t fileSize, File *in, File *out)
 {
-	Encoder_Node *root = encoder_newNode(bfsData[i], 0, NULL, NULL);
+	uint32_t length = 0;
+	uint16_t index = bfsData[0];
+	uint16_t ch = Fgetc(in);
 
-	if (i >= n)
-		return NULL;
+	while (!Feof(in)) {
+		int8_t bit;
 
-	/* determine if this is a leaf node */
-	if (!(bfsData[i] & 0x8000)) {
+		while (((bit=FgetBit(ch)) != -1) && length < fileSize) {
 
-		uint16_t index = bfsData[i]; /* left-child node index */
+			index = bfsData[index + bit];
 
-		root->left = decoder_rebuildEncoder(bfsData, index, n);
-		root->right = decoder_rebuildEncoder(bfsData, index+1, n);
-	}
+			if (index & 0x8000) {
+				Fputc(index, out);
+				index = bfsData[0];
+				++length;
+			}
+		}
 
-	return root;	
+		ch = Fgetc(in);
+	}	
 }

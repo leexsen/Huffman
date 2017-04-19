@@ -23,6 +23,29 @@ Encoder_Node *encoder_newNode(uint16_t ch, uint8_t bit,
 	return p;
 }
 
+Queue *encoder_countFrequency(Queue_Node *buffer[], File *in, File *out)
+{
+	Encoder_Node *en;
+	Queue_Node *qn;
+	Queue *queueHead = queue_new();
+	uint8_t ch = Fgetc(in);
+
+	while (!Feof(in)) {
+
+		if (buffer[ch] == NULL) {
+			en = encoder_newNode(ch, 0, NULL, NULL);
+			qn = queue_newNode(1, en, NULL, NULL);
+			queue_append(queueHead, qn);
+			buffer[ch] = qn;
+		} else
+			buffer[ch]->count++;
+
+		ch = Fgetc(in);
+	}
+
+	return queueHead;
+}
+
 Encoder_Node *encoder_newEncoder(Queue *q)
 {
 	Queue_Node *qr, *ql;

@@ -30,5 +30,6 @@ extern Encoder_Node *encoder_newNode(uint16_t, uint8_t, Encoder_Node *, Encoder_
 extern void encoder_writeHeader(Encoder_Node *, File *, uint32_t, uint16_t);
 extern void encoder_writeData(Encoder_Table **, File *, File *);
 extern uint16_t encoder_getEncoderNodeCount(Encoder_Table **);
+extern Queue *encoder_countFrequency(Queue_Node *[], File *, File *);
 
 #endif

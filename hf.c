@@ -49,36 +49,15 @@ int main(int argc, char **argv)
 
 void compress(File *in, File *out)
 {
-	uint8_t ch;
-	Queue_Node *buf[256] = {0};
-	Queue *queueHead;
-	Encoder_Node *en, *root;
-	Encoder_Table **table;
-	Queue_Node *qn;
-	uint16_t nodeCount;
-
-	queueHead = queue_new();
-	ch = Fgetc(in);
-
-	while (!Feof(in)) {
-
-		if (buf[ch] == NULL) {
-			en = encoder_newNode(ch, 0, NULL, NULL);
-			qn = queue_newNode(1, en, NULL, NULL);
-			queue_append(queueHead, qn);
-			buf[ch] = qn;
-		} else
-			buf[ch]->count++;
-
-		ch = Fgetc(in);
-	}
+	Queue_Node *buffer[256] = {0};
+	Queue *queueHead = encoder_countFrequency(buffer, in, out);
 
 	Frewind(in);
 
-	root = encoder_newEncoder(queueHead);
-	table = encoder_newEncoderTable(buf);
+	Encoder_Node *root = encoder_newEncoder(queueHead);
+	Encoder_Table **table = encoder_newEncoderTable(buffer);
 
-	nodeCount = encoder_getEncoderNodeCount(table);
+	uint16_t nodeCount = encoder_getEncoderNodeCount(table);
 	encoder_writeHeader(root, out, in->size, nodeCount);
 	encoder_writeData(table, in, out);
 
@@ -89,35 +68,12 @@ void compress(File *in, File *out)
 
 void decompress(File *in, File *out)
 {
-    uint32_t fileSize, length = 0;
+	uint32_t fileSize;
 	uint16_t encoderNodeCount;
-	uint16_t ch, *bfsData;
-	Encoder_Node *root, *p;
+	uint16_t *bfsData;
 
 	decoder_readHead(&fileSize, &encoderNodeCount, &bfsData, in);
-	root = decoder_rebuildEncoder(bfsData, 0, encoderNodeCount);
-
-	ch = Fgetc(in);
-	p = root;
-	while (!Feof(in)) {
-		int8_t bit;
-
-		while (((bit=FgetBit(ch)) != -1) && length < fileSize) {
-			if (bit == 0)
-				p = p->left;
-			else
-				p = p->right;
-
-			if (p->left == NULL && p->right == NULL) {
-				Fputc(p->ch, out);
-				p = root;
-				++length;
-			}
-		}
-
-		ch = Fgetc(in);
-	}
+	decoder_writeData(bfsData, fileSize, in, out);
 
 	free(bfsData);
-	encoder_freeEncoder(root);
 }

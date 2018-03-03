@@ -1,7 +1,7 @@
 ifeq ($(DEBUG), 1)
 	CFLAGS=-Wall -Werror -g -c
 else
-	CFLAGS=-Ofast -c 
+	CFLAGS=-Wall -Werror -Ofast -march=native -mtune=native -flto -funroll-loops -c 
 endif
 
 all: buffer.o encoder.o decoder.o hf.o queue.o 
